@@ -1,144 +1,131 @@
-"""
-Finovate Journal AI - Application Constants
+"""Application constants."""
 
-Developer: Ahmed Mostafa Ibrahim
-Brand: Finovate – AHMED EG
-"""
+from decimal import Decimal
 
-# Application Information
+# Application Info
 APP_NAME = "Finovate Journal AI"
-APP_VERSION = "1.0.0"
-APP_DESCRIPTION = "AI-Powered Desktop Accounting & Journal Entry Assistant"
+VERSION = "1.0.0"
+ORGANIZATION = "Finovate – AHMED EG"
 
 # Developer Information
-DEVELOPER_NAME = "Ahmed Mostafa Ibrahim"
-DEVELOPER_BRAND = "Finovate – AHMED EG"
-DEVELOPER_OFFICE = "Finovate – AHMED EG"
-DEVELOPER_EMAIL = "GOGOM8870@GMAIL.COM"
-DEVELOPER_PHONE = "01225155329"
-COPYRIGHT_TEXT = "© 2025 Ahmed Mostafa Ibrahim — All Rights Reserved."
+DEVELOPER_INFO = {
+    "name": "Ahmed Mostafa Ibrahim",
+    "brand": "Finovate – AHMED EG",
+    "email": "GOGOM8870@GMAIL.COM",
+    "phone": "01225155329",
+    "copyright": "© 2025 Ahmed Mostafa Ibrahim — All Rights Reserved.",
+}
 
-# Default Settings
-DEFAULT_LANGUAGE = "ar"  # Arabic default
-DEFAULT_CURRENCY = "EGP"
+# Supported Languages
 SUPPORTED_LANGUAGES = ["ar", "en"]
-SUPPORTED_CURRENCIES = ["EGP", "USD", "EUR", "SAR", "AED", "GBP"]
+DEFAULT_LANGUAGE = "ar"
 
-# Journal Entry Numbering
-JOURNAL_ENTRY_PREFIX = "JE"
-JOURNAL_NUMBER_FORMAT = "{prefix}-{year}-{sequence:06d}"
-
-# Account Types
-ACCOUNT_TYPES = [
-    "asset",
-    "liability",
-    "equity",
-    "revenue",
-    "expense",
-]
-
-# Normal Balances
-NORMAL_BALANCES = {
-    "asset": "debit",
-    "liability": "credit",
-    "equity": "credit",
-    "revenue": "credit",
-    "expense": "debit",
+# Currency
+DEFAULT_CURRENCY = "EGP"
+CURRENCY_SYMBOLS = {
+    "EGP": "ج.م",
+    "USD": "$",
+    "EUR": "€",
+    "SAR": "﷼",
+    "AED": "د.إ",
+    "GBP": "£",
 }
 
 # Journal Entry Status
-ENTRY_STATUS_DRAFT = "draft"
-ENTRY_STATUS_REVIEWED = "reviewed"
-ENTRY_STATUS_POSTED = "posted"
-ENTRY_STATUS_CANCELLED = "cancelled"
-
-ENTRY_STATUSES = [
-    ENTRY_STATUS_DRAFT,
-    ENTRY_STATUS_REVIEWED,
-    ENTRY_STATUS_POSTED,
-    ENTRY_STATUS_CANCELLED,
-]
+ENTRY_STATUS = {
+    "DRAFT": "draft",
+    "AI_SUGGESTED": "ai_suggested",
+    "USER_EDITED": "user_edited",
+    "REVIEWED": "reviewed",
+    "POSTED": "posted",
+    "CANCELLED": "cancelled",
+}
 
 # User Roles
-ROLE_ADMINISTRATOR = "administrator"
-ROLE_ACCOUNTANT = "accountant"
-ROLE_REVIEWER = "reviewer"
-ROLE_VIEWER = "viewer"
+USER_ROLES = {
+    "ADMIN": "admin",
+    "ACCOUNTANT": "accountant",
+    "REVIEWER": "reviewer",
+    "VIEWER": "viewer",
+}
 
-USER_ROLES = [
-    ROLE_ADMINISTRATOR,
-    ROLE_ACCOUNTANT,
-    ROLE_REVIEWER,
-    ROLE_VIEWER,
-]
+# Account Types
+ACCOUNT_TYPES = {
+    "ASSET": "asset",
+    "LIABILITY": "liability",
+    "EQUITY": "equity",
+    "REVENUE": "revenue",
+    "EXPENSE": "expense",
+}
 
-# AI Providers
-AI_PROVIDER_DISABLED = "disabled"
-AI_PROVIDER_LOCAL = "local"
-AI_PROVIDER_ONLINE = "online"
-AI_PROVIDER_AUTO = "auto"
-
-AI_PROVIDERS = [
-    AI_PROVIDER_DISABLED,
-    AI_PROVIDER_LOCAL,
-    AI_PROVIDER_ONLINE,
-    AI_PROVIDER_AUTO,
-]
+# Normal Balances (Debit or Credit)
+NORMAL_BALANCES = {
+    "ASSET": "debit",
+    "LIABILITY": "credit",
+    "EQUITY": "credit",
+    "REVENUE": "credit",
+    "EXPENSE": "debit",
+}
 
 # Confidence Levels
-CONFIDENCE_HIGH = 90  # 90-100%
-CONFIDENCE_MEDIUM = 75  # 75-89%
-CONFIDENCE_LOW = 50  # 50-74%
-# Below 50% needs review
+CONFIDENCE_LEVELS = {
+    "VERY_HIGH": (90, 100),
+    "HIGH": (75, 89),
+    "MEDIUM": (50, 74),
+    "LOW": (0, 49),
+}
 
-# Paths (relative to app root)
-DATABASE_DIR = "data"
+# Date Formats
+DATE_FORMATS = {
+    "ar": "%Y-%m-%d",
+    "en": "%Y-%m-%d",
+}
+
+DATETIME_FORMATS = {
+    "ar": "%Y-%m-%d %H:%M:%S",
+    "en": "%Y-%m-%d %H:%M:%S",
+}
+
+# Number Format
+DECIMAL_PLACES = 3
+MIN_DECIMAL = Decimal("0.001")
+MAX_DECIMAL = Decimal("999999999.999")
+
+# File Paths
+DATA_DIR = "data"
+BACKUP_DIR = "backups"
 LOGS_DIR = "logs"
-BACKUPS_DIR = "backups"
 REPORTS_DIR = "reports"
 TEMPLATES_DIR = "templates"
 I18N_DIR = "i18n"
-ASSETS_DIR = "assets"
 
 # Database
-DATABASE_FILENAME = "finovate_journal.db"
+DATABASE_NAME = "finovate_journal.db"
+DATABASE_URL_TEMPLATE = f"sqlite:///{DATA_DIR}/{DATABASE_NAME}"
 
 # Logging
 LOG_FORMAT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-LOG_DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 LOG_MAX_BYTES = 10 * 1024 * 1024  # 10 MB
 LOG_BACKUP_COUNT = 5
 
-# Excel
-EXCEL_DATE_FORMAT = "%Y-%m-%d"
-EXCEL_NUMBER_FORMAT = "#,##0.00"
+# AI Settings
+DEFAULT_AI_PROVIDER = "rules_engine"
+AI_PROVIDERS = ["rules_engine", "ollama", "lm_studio", "openai_compatible", "openrouter"]
+DEFAULT_AI_MODEL = "gpt-4o-mini"
+DEFAULT_TEMPERATURE = 0.3
 
-# PDF
-PDF_FONT_ARABIC = "Arial"
-PDF_FONT_ENGLISH = "Arial"
-PDF_FONT_SIZE = 12
-PDF_PAGE_SIZE = "A4"
+# Backup
+BACKUP_ENABLED = True
+BACKUP_FREQUENCY = "daily"  # daily, weekly, monthly
+MAX_BACKUPS = 10
 
 # Security
 PASSWORD_MIN_LENGTH = 8
 SESSION_TIMEOUT_MINUTES = 60
 MAX_LOGIN_ATTEMPTS = 5
 
-# Backup
-BACKUP_RETENTION_DAYS = 30
-AUTO_BACKUP_ENABLED = True
-AUTO_BACKUP_FREQUENCY = "daily"  # daily, weekly, monthly
-
-# Tax
-DEFAULT_TAX_RATE = 14.0  # Egypt VAT default
-TAX_CALCULATION_METHOD = "exclusive"  # exclusive or inclusive
-
-# Decimal Precision
-DECIMAL_PRECISION = 3  # For financial calculations
-
 # UI
+DEFAULT_THEME = "light"  # light, dark
 DEFAULT_WINDOW_WIDTH = 1400
 DEFAULT_WINDOW_HEIGHT = 900
 SIDEBAR_WIDTH = 250
-DARK_MODE_DEFAULT = False
-RTL_DEFAULT_FOR_AR = True

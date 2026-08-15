@@ -1,37 +1,23 @@
-# Finovate Journal AI - Requirements
-# Core Framework
+# Core Dependencies
 PySide6>=6.6.0
-SQLAlchemy>=2.0.23
+SQLAlchemy>=2.0.0
 pydantic>=2.5.0
-pydantic-settings>=2.1.0
+openpyxl>=3.1.0
+pandas>=2.1.0
+reportlab>=4.0.0
+matplotlib>=3.8.0
 
-# Database
-sqlite-utils>=3.36
-
-# Excel & Data Processing
-openpyxl>=3.1.2
-pandas>=2.1.3
-
-# PDF Generation
-reportlab>=4.0.7
-
-# Charts
-matplotlib>=3.8.2
-
-# NLP & AI
-regex>=2023.10.3
+# NLP & AI (Optional)
+# No heavy NLP libraries required for basic parser
+# Users can install transformers/torch if using advanced AI features
 
 # Utilities
-python-dateutil>=2.8.2
-babel>=2.13.1
-
-# Security
-bcrypt>=4.1.2
-cryptography>=41.0.7
+python-dateutil>=2.8.0
+babel>=2.13.0
 
 # Testing
-pytest>=7.4.3
+pytest>=7.4.0
 pytest-cov>=4.1.0
 
-# Build Tools (Optional)
-pyinstaller>=6.3.0
+# Build
+pyinstaller>=6.0.0

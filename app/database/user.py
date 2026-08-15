@@ -1,57 +1,64 @@
-"""
-Finovate Journal AI - User Model
+"""User model for authentication and authorization."""
 
-Developer: Ahmed Mostafa Ibrahim
-Brand: Finovate – AHMED EG
-"""
-
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, Enum as SQLEnum
 from sqlalchemy.orm import relationship
 from datetime import datetime
+import enum
+import hashlib
 
 from .base import Base
 
 
+class UserRole(str, enum.Enum):
+    """User role enumeration."""
+
+    ADMIN = "admin"
+    ACCOUNTANT = "accountant"
+    REVIEWER = "reviewer"
+    VIEWER = "viewer"
+
+
 class User(Base):
-    """User model for authentication and authorization."""
+    """User model for authentication."""
 
     __tablename__ = "users"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     username = Column(String(50), unique=True, nullable=False, index=True)
-    email = Column(String(100), unique=True, nullable=True)
+    email = Column(String(100), unique=True, nullable=False, index=True)
     password_hash = Column(String(255), nullable=False)
     full_name = Column(String(100), nullable=True)
-    
-    # Role-based access control
-    role = Column(String(50), nullable=False, default="accountant")  # administrator, accountant, reviewer, viewer
-    
-    # Account status
-    is_active = Column(Boolean, default=True)
-    is_locked = Column(Boolean, default=False)
-    failed_login_attempts = Column(Integer, default=0)
+    role = Column(SQLEnum(UserRole), default=UserRole.VIEWER, nullable=False)
+    is_active = Column(Boolean, default=True, nullable=False)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
     last_login = Column(DateTime, nullable=True)
-    
-    # Timestamps
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    
+    company_id = Column(Integer, nullable=True)  # Link to company if multi-user
+
     # Relationships
-    journal_entries = relationship("JournalEntry", back_populates="created_by_user")
     audit_logs = relationship("AuditLog", back_populates="user")
+    journal_entries = relationship("JournalEntry", back_populates="created_by_user")
 
-    def __repr__(self):
-        return f"<User(id={self.id}, username='{self.username}', role='{self.role}')>"
+    def set_password(self, password: str) -> None:
+        """Hash and set the user's password."""
+        # Simple hash - in production use bcrypt or argon2
+        self.password_hash = hashlib.sha256(password.encode()).hexdigest()
 
-    def to_dict(self):
-        """Convert user to dictionary (excluding sensitive data)."""
-        return {
-            "id": self.id,
-            "username": self.username,
-            "email": self.email,
-            "full_name": self.full_name,
-            "role": self.role,
-            "is_active": self.is_active,
-            "last_login": self.last_login.isoformat() if self.last_login else None,
-            "created_at": self.created_at.isoformat() if self.created_at else None,
+    def check_password(self, password: str) -> bool:
+        """Verify the password against the hash."""
+        return self.password_hash == hashlib.sha256(password.encode()).hexdigest()
+
+    def has_permission(self, required_role: str) -> bool:
+        """Check if user has required permission level."""
+        role_hierarchy = {
+            "viewer": 1,
+            "reviewer": 2,
+            "accountant": 3,
+            "admin": 4,
         }
+        user_level = role_hierarchy.get(self.role.value, 0)
+        required_level = role_hierarchy.get(required_role, 0)
+        return user_level >= required_level
+
+    def __repr__(self) -> str:
+        return f"<User(id={self.id}, username='{self.username}', role='{self.role.value}')>"

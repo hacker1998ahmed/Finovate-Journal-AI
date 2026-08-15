@@ -1,10 +1,6 @@
-"""
-Finovate Journal AI - SQLAlchemy Models Import
+"""SQLAlchemy model imports."""
 
-Developer: Ahmed Mostafa Ibrahim
-Brand: Finovate – AHMED EG
-"""
-
+# Import all models to ensure they are registered with Base
 from .base import Base
 from .user import User
 from .company import Company, FiscalYear
@@ -16,7 +12,7 @@ from .tax import Tax
 from .cost_center import CostCenter
 from .project import Project
 from .audit import AuditLog
-from .settings_model import Settings as SettingsModel
+from .settings_model import Settings
 
 __all__ = [
     "Base",
@@ -35,5 +31,5 @@ __all__ = [
     "CostCenter",
     "Project",
     "AuditLog",
-    "SettingsModel",
+    "Settings",
 ]

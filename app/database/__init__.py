@@ -1,13 +1,7 @@
-"""
-Finovate Journal AI - Database Module
+"""Database module for Finovate Journal AI."""
 
-Developer: Ahmed Mostafa Ibrahim
-Brand: Finovate – AHMED EG
-"""
-
-from .session import get_engine, get_session, SessionLocal, init_db
+from .database import get_engine, get_session, get_session_local, Base
 from .models_imports import (
-    Base,
     User,
     Company,
     FiscalYear,
@@ -29,8 +23,7 @@ from .models_imports import (
 __all__ = [
     "get_engine",
     "get_session",
-    "SessionLocal",
-    "init_db",
+    "get_session_local",
     "Base",
     "User",
     "Company",
