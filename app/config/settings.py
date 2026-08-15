@@ -1,194 +1,136 @@
-"""
-Finovate Journal AI - Settings Management
+"""Application settings using Pydantic."""
 
-Developer: Ahmed Mostafa Ibrahim
-Brand: Finovate – AHMED EG
-"""
-
-import os
-from pathlib import Path
 from typing import Optional, List
-from pydantic_settings import BaseSettings, SettingsConfigDict
-from pydantic import Field
+from pydantic import BaseModel, Field
+from pathlib import Path
+import json
 
 from .constants import (
-    APP_NAME,
-    APP_VERSION,
-    DEVELOPER_NAME,
-    DEVELOPER_BRAND,
-    DEVELOPER_EMAIL,
-    DEVELOPER_PHONE,
-    COPYRIGHT_TEXT,
+    DEVELOPER_INFO,
     DEFAULT_LANGUAGE,
     DEFAULT_CURRENCY,
-    SUPPORTED_LANGUAGES,
-    SUPPORTED_CURRENCIES,
-    DATABASE_DIR,
-    LOGS_DIR,
-    BACKUPS_DIR,
-    REPORTS_DIR,
-    DATABASE_FILENAME,
-    AI_PROVIDER_DISABLED,
-    DEFAULT_TAX_RATE,
-    DARK_MODE_DEFAULT,
-    RTL_DEFAULT_FOR_AR,
+    DEFAULT_AI_PROVIDER,
+    DEFAULT_AI_MODEL,
+    DEFAULT_TEMPERATURE,
+    DEFAULT_THEME,
+    DEFAULT_WINDOW_WIDTH,
+    DEFAULT_WINDOW_HEIGHT,
+    BACKUP_ENABLED,
+    BACKUP_FREQUENCY,
+    MAX_BACKUPS,
+    DATA_DIR,
+    BACKUP_DIR,
 )
 
 
-class Settings(BaseSettings):
-    """Application settings with environment variable support."""
+class DeveloperInfo(BaseModel):
+    """Developer information model."""
 
-    model_config = SettingsConfigDict(
-        env_prefix="FINOVATE_",
-        env_file=".env",
-        env_file_encoding="utf-8",
-        case_sensitive=False,
-        extra="ignore",
-    )
-
-    # Application Info (Read-only from code)
-    app_name: str = Field(default=APP_NAME, frozen=True)
-    app_version: str = Field(default=APP_VERSION, frozen=True)
-    developer_name: str = Field(default=DEVELOPER_NAME, frozen=True)
-    developer_brand: str = Field(default=DEVELOPER_BRAND, frozen=True)
-    developer_email: str = Field(default=DEVELOPER_EMAIL, frozen=True)
-    developer_phone: str = Field(default=DEVELOPER_PHONE, frozen=True)
-    copyright_text: str = Field(default=COPYRIGHT_TEXT, frozen=True)
-
-    # General Settings
-    language: str = Field(default=DEFAULT_LANGUAGE, description="Application language (ar/en)")
-    currency: str = Field(default=DEFAULT_CURRENCY, description="Default currency")
-    date_format: str = Field(default="%Y-%m-%d", description="Date display format")
-    dark_mode: bool = Field(default=DARK_MODE_DEFAULT, description="Enable dark mode")
-    rtl_enabled: bool = Field(default=RTL_DEFAULT_FOR_AR, description="Right-to-left layout")
-
-    # Company Settings
-    company_name: str = Field(default="", description="Company name")
-    company_address: str = Field(default="", description="Company address")
-    company_tax_number: str = Field(default="", description="Company tax number")
-    company_phone: str = Field(default="", description="Company phone")
-    company_email: str = Field(default="", description="Company email")
-
-    # Fiscal Year
-    fiscal_year_start_month: int = Field(default=1, description="Fiscal year start month (1-12)")
-    fiscal_year_start_day: int = Field(default=1, description="Fiscal year start day (1-31)")
-    current_fiscal_year: int = Field(default=2025, description="Current fiscal year")
-
-    # Accounting Settings
-    journal_prefix: str = Field(default="JE", description="Journal entry prefix")
-    default_tax_rate: float = Field(default=DEFAULT_TAX_RATE, description="Default VAT rate")
-    tax_inclusive: bool = Field(default=False, description="Prices include tax by default")
-    allow_negative_stock: bool = Field(default=False, description="Allow negative inventory")
-    enable_cost_centers: bool = Field(default=True, description="Enable cost centers")
-    enable_projects: bool = Field(default=True, description="Enable project accounting")
-
-    # Database
-    database_path: str = Field(default="", description="Path to database file")
-    
-    # Paths
-    base_dir: Path = Field(default=Path(__file__).parent.parent.parent)
-    data_dir: str = Field(default=DATABASE_DIR)
-    logs_dir: str = Field(default=LOGS_DIR)
-    backups_dir: str = Field(default=BACKUPS_DIR)
-    reports_dir: str = Field(default=REPORTS_DIR)
-
-    # AI Settings
-    ai_provider: str = Field(default=AI_PROVIDER_DISABLED, description="AI provider (disabled/local/online/auto)")
-    ai_api_key: str = Field(default="", description="API key for online AI providers")
-    ai_api_url: str = Field(default="", description="API URL for custom/OpenAI-compatible providers")
-    ai_model: str = Field(default="", description="AI model name")
-    ai_temperature: float = Field(default=0.3, ge=0.0, le=2.0, description="AI temperature")
-    ai_local_url: str = Field(default="http://localhost:1234/v1", description="Local AI endpoint (LM Studio/Ollama)")
-    ai_send_data_consent: bool = Field(default=False, description="User consent to send data to external AI")
-
-    # Backup Settings
-    auto_backup_enabled: bool = Field(default=True, description="Enable automatic backup")
-    auto_backup_frequency: str = Field(default="daily", description="Backup frequency (daily/weekly/monthly)")
-    backup_retention_days: int = Field(default=30, description="Days to keep backups")
-    backup_path: str = Field(default="", description="Custom backup path")
-
-    # Security
-    session_timeout_minutes: int = Field(default=60, description="Session timeout in minutes")
-    max_login_attempts: int = Field(default=5, description="Maximum login attempts before lockout")
-    password_min_length: int = Field(default=8, description="Minimum password length")
-
-    # UI
-    window_width: int = Field(default=1400, description="Default window width")
-    window_height: int = Field(default=900, description="Default window height")
-    sidebar_width: int = Field(default=250, description="Sidebar width")
-    font_size: int = Field(default=12, description="Default font size")
-
-    @property
-    def database_file(self) -> Path:
-        """Get full path to database file."""
-        db_dir = self.base_dir / self.data_dir
-        db_dir.mkdir(parents=True, exist_ok=True)
-        if self.database_path:
-            return Path(self.database_path)
-        return db_dir / DATABASE_FILENAME
-
-    @property
-    def logs_directory(self) -> Path:
-        """Get full path to logs directory."""
-        logs_dir = self.base_dir / self.logs_dir
-        logs_dir.mkdir(parents=True, exist_ok=True)
-        return logs_dir
-
-    @property
-    def backups_directory(self) -> Path:
-        """Get full path to backups directory."""
-        backups_dir = self.base_dir / self.backups_dir
-        backups_dir.mkdir(parents=True, exist_ok=True)
-        if self.backup_path:
-            return Path(self.backup_path)
-        return backups_dir
-
-    @property
-    def reports_directory(self) -> Path:
-        """Get full path to reports directory."""
-        reports_dir = self.base_dir / self.reports_dir
-        reports_dir.mkdir(parents=True, exist_ok=True)
-        return reports_dir
-
-    @property
-    def is_rtl(self) -> bool:
-        """Check if RTL layout should be enabled."""
-        return self.rtl_enabled and self.language == "ar"
-
-    @property
-    def supported_languages(self) -> List[str]:
-        """Get list of supported languages."""
-        return SUPPORTED_LANGUAGES
-
-    @property
-    def supported_currencies(self) -> List[str]:
-        """Get list of supported currencies."""
-        return SUPPORTED_CURRENCIES
-
-    def validate_settings(self) -> bool:
-        """Validate critical settings."""
-        if self.language not in self.supported_languages:
-            return False
-        if self.currency not in self.supported_currencies:
-            return False
-        if self.default_tax_rate < 0 or self.default_tax_rate > 100:
-            return False
-        return True
+    name: str = Field(default=DEVELOPER_INFO["name"])
+    brand: str = Field(default=DEVELOPER_INFO["brand"])
+    email: str = Field(default=DEVELOPER_INFO["email"])
+    phone: str = Field(default=DEVELOPER_INFO["phone"])
+    copyright: str = Field(default=DEVELOPER_INFO["copyright"])
 
 
-# Singleton instance
-_settings_instance: Optional[Settings] = None
+class AppSettings(BaseModel):
+    """General application settings."""
+
+    app_name: str = "Finovate Journal AI"
+    version: str = "1.0.0"
+    language: str = Field(default=DEFAULT_LANGUAGE)
+    currency: str = Field(default=DEFAULT_CURRENCY)
+    theme: str = Field(default=DEFAULT_THEME)
+    window_width: int = Field(default=DEFAULT_WINDOW_WIDTH)
+    window_height: int = Field(default=DEFAULT_WINDOW_HEIGHT)
+    date_format: str = "%Y-%m-%d"
+    number_format: str = "ar_EG"  # Arabic Egypt format
 
 
-def get_settings() -> Settings:
-    """Get or create settings singleton instance."""
-    global _settings_instance
-    if _settings_instance is None:
-        _settings_instance = Settings()
-    return _settings_instance
+class AccountingSettings(BaseModel):
+    """Accounting-specific settings."""
+
+    fiscal_year_start_month: int = Field(default=1)  # January
+    fiscal_year_start_day: int = Field(default=1)
+    allow_negative_inventory: bool = Field(default=False)
+    default_tax_rate: float = Field(default=14.0)  # Egypt VAT
+    auto_numbering: bool = Field(default=True)
+    journal_prefix: str = Field(default="JE")
+    enable_cost_centers: bool = Field(default=True)
+    enable_projects: bool = Field(default=True)
+    enable_multi_currency: bool = Field(default=False)
 
 
-def reset_settings() -> None:
-    """Reset settings singleton (for testing)."""
-    global _settings_instance
-    _settings_instance = None
+class AISettings(BaseModel):
+    """AI provider settings."""
+
+    enabled: bool = Field(default=False)
+    provider: str = Field(default=DEFAULT_AI_PROVIDER)
+    api_url: Optional[str] = Field(default=None)
+    api_key: Optional[str] = Field(default=None)
+    model: str = Field(default=DEFAULT_AI_MODEL)
+    temperature: float = Field(default=DEFAULT_TEMPERATURE)
+    max_tokens: int = Field(default=1024)
+    timeout_seconds: int = Field(default=30)
+    send_data_consent: bool = Field(default=False)
+    local_endpoint: Optional[str] = Field(default=None)  # For Ollama/LM Studio
+
+
+class BackupSettings(BaseModel):
+    """Backup settings."""
+
+    enabled: bool = Field(default=BACKUP_ENABLED)
+    frequency: str = Field(default=BACKUP_FREQUENCY)
+    max_backups: int = Field(default=MAX_BACKUPS)
+    backup_dir: str = Field(default=BACKUP_DIR)
+    auto_backup_on_close: bool = Field(default=True)
+
+
+class CompanySettings(BaseModel):
+    """Company-specific settings."""
+
+    company_name: str = Field(default="")
+    company_address: str = Field(default="")
+    tax_number: str = Field(default="")
+    commercial_registration: str = Field(default="")
+    logo_path: Optional[str] = Field(default=None)
+    phone: str = Field(default="")
+    email: str = Field(default="")
+
+
+class Settings(BaseModel):
+    """Main settings container."""
+
+    developer: DeveloperInfo = Field(default_factory=DeveloperInfo)
+    app: AppSettings = Field(default_factory=AppSettings)
+    accounting: AccountingSettings = Field(default_factory=AccountingSettings)
+    ai: AISettings = Field(default_factory=AISettings)
+    backup: BackupSettings = Field(default_factory=BackupSettings)
+    company: CompanySettings = Field(default_factory=CompanySettings)
+
+    class Config:
+        arbitrary_types_allowed = True
+
+    def save(self, filepath: Path) -> None:
+        """Save settings to JSON file."""
+        with open(filepath, "w", encoding="utf-8") as f:
+            json.dump(self.model_dump(), f, indent=2, ensure_ascii=False)
+
+    @classmethod
+    def load(cls, filepath: Path) -> "Settings":
+        """Load settings from JSON file."""
+        if not filepath.exists():
+            return cls()
+
+        with open(filepath, "r", encoding="utf-8") as f:
+            data = json.load(f)
+
+        return cls(**data)
+
+    def get_developer_info(self) -> dict:
+        """Get developer information as dictionary."""
+        return self.developer.model_dump()
+
+    def is_ai_enabled(self) -> bool:
+        """Check if AI is enabled and consented."""
+        return self.ai.enabled and self.ai.send_data_consent

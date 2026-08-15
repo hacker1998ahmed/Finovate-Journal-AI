@@ -1,37 +1,31 @@
-"""
-Finovate Journal AI - Configuration Module
+"""Configuration module for Finovate Journal AI."""
 
-Developer: Ahmed Mostafa Ibrahim
-Brand: Finovate – AHMED EG
-"""
-
-from .settings import Settings, get_settings
+from .settings import Settings, DeveloperInfo, AppSettings, AccountingSettings, AISettings
 from .constants import (
     APP_NAME,
-    APP_VERSION,
-    DEVELOPER_NAME,
-    DEVELOPER_BRAND,
-    DEVELOPER_EMAIL,
-    DEVELOPER_PHONE,
-    COPYRIGHT_TEXT,
-    DEFAULT_CURRENCY,
-    DEFAULT_LANGUAGE,
+    VERSION,
+    DEVELOPER_INFO,
     SUPPORTED_LANGUAGES,
-    JOURNAL_ENTRY_PREFIX,
+    DEFAULT_CURRENCY,
+    ENTRY_STATUS,
+    USER_ROLES,
+    ACCOUNT_TYPES,
+    NORMAL_BALANCES,
 )
 
 __all__ = [
     "Settings",
-    "get_settings",
+    "DeveloperInfo",
+    "AppSettings",
+    "AccountingSettings",
+    "AISettings",
     "APP_NAME",
-    "APP_VERSION",
-    "DEVELOPER_NAME",
-    "DEVELOPER_BRAND",
-    "DEVELOPER_EMAIL",
-    "DEVELOPER_PHONE",
-    "COPYRIGHT_TEXT",
-    "DEFAULT_CURRENCY",
-    "DEFAULT_LANGUAGE",
+    "VERSION",
+    "DEVELOPER_INFO",
     "SUPPORTED_LANGUAGES",
-    "JOURNAL_ENTRY_PREFIX",
+    "DEFAULT_CURRENCY",
+    "ENTRY_STATUS",
+    "USER_ROLES",
+    "ACCOUNT_TYPES",
+    "NORMAL_BALANCES",
 ]
