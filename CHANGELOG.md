@@ -13,83 +13,114 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 #### Core Features
 - Initial release of Finovate Journal AI
-- Smart Journal with Arabic/English NLP parser
-- Manual Journal entry with double-entry validation
+- Smart Journal with natural language processing (Arabic & English)
+- Manual journal entry with double-entry validation
 - Chart of Accounts with hierarchical structure
-- Journal Ledger, General Ledger, Trial Balance reports
-- Tax Engine with configurable VAT rates
+- General Ledger with balance calculations
+- Trial Balance report with verification
 - Multi-company support
-- Fiscal year management (open/close)
+- Fiscal year management
 
-#### AI & NLP
-- Hybrid accounting engine (Rules + AI)
-- Confidence score calculation
+#### Accounting Engine
+- Rule-based accounting engine (offline)
+- NLP parser for transaction classification
+- Confidence scoring system
 - Ambiguity detection
-- Multiple AI provider support (OpenAI, Ollama, LM Studio)
-- Offline mode with rules engine
+- Tax engine with configurable VAT rates
+- Decimal precision for all financial calculations
 
-#### UI/UX
-- Modern PySide6 interface
-- RTL support for Arabic
-- Dark/Light theme
-- Dashboard with KPIs and charts
-- Responsive sidebar navigation
+#### User Interface
+- Modern PySide6 desktop interface
+- Dashboard with key metrics and charts
+- Sidebar navigation with RTL/LTR support
+- Dark mode and light mode themes
+- Bilingual interface (Arabic/English)
 
-#### Reports & Export
-- PDF report generation with ReportLab
-- Excel import/export with openpyxl
-- Financial statements (Income Statement, Balance Sheet)
-- Customer/Supplier statements
+#### Data Management
+- SQLite database with SQLAlchemy ORM
+- Excel import/export functionality
+- PDF report generation
+- Automatic backup and restore
+- Audit logging system
 
-#### Security & Compliance
+#### Security
 - Role-based access control (Admin, Accountant, Reviewer, Viewer)
-- Audit trail logging
-- Password hashing
-- SQL injection prevention
-- Backup & restore functionality
+- Password hashing with bcrypt
+- Session management
+- API key encryption
 
-#### Developer Experience
-- Comprehensive logging system
-- Unit test framework with pytest
-- Modular architecture
-- Type hints and docstrings
-- PEP 8 compliance
+#### AI Integration
+- AI provider abstraction layer
+- Support for OpenAI-compatible APIs
+- Local AI support (Ollama, LM Studio)
+- Privacy-focused design (opt-in data sharing)
+
+#### Reports
+- Journal report
+- Ledger report
+- Trial Balance
+- Income Statement (basic)
+- Balance Sheet (basic)
+- Customer statement
+- Supplier statement
 
 ### 🔧 Technical
-- Python 3.12+
-- SQLAlchemy 2.0 ORM
-- Pydantic 2.x for data validation
-- SQLite database
-- Decimal precision for financial calculations
+- Python 3.12+ compatibility
+- Modular architecture
+- Comprehensive logging with rotation
+- Unit testing framework
+- Type hints throughout codebase
+- PEP 8 compliance
 
-### 📝 Documentation
-- README with installation guide
-- CHANGELOG
-- LICENSE (MIT)
-- Inline code documentation
+### 📝 Developer
+- Developer: Ahmed Mostafa Ibrahim
+- Brand: Finovate – AHMED EG
+- Contact: GOGOM8870@GMAIL.COM | 01225155329
 
 ---
 
 ## [Unreleased]
 
-### Planned Features
+### 🚧 In Progress
 - Advanced inventory management
-- Project accounting
-- Cost centers
-- E-invoicing integration
-- Cloud sync
-- Mobile app companion
-- Web dashboard
-- PostgreSQL support
-- Bank integration
-- OCR for receipts
+- Full invoicing system
+- Project accounting enhancements
+- Cost center tracking
+- Bank reconciliation
+- E-Invoice integration (Egyptian Tax Authority)
+- Mobile companion app
+- Cloud sync option
+- Advanced analytics dashboard
+- OCR for receipt scanning
 - Payroll module
-- Advanced analytics
+
+### 🐛 Known Issues
+- None reported in initial release
 
 ---
 
-**Developer:** Ahmed Mostafa Ibrahim  
-**Brand:** Finovate – AHMED EG  
-**Contact:** GOGOM8870@GMAIL.COM | 01225155329
+## Version History Template
 
-© 2025 Ahmed Mostafa Ibrahim — All Rights Reserved.
+### [X.Y.Z] - YYYY-MM-DD
+
+#### Added
+- New features
+
+#### Changed
+- Changes to existing functionality
+
+#### Deprecated
+- Soon-to-be removed features
+
+#### Removed
+- Removed features
+
+#### Fixed
+- Bug fixes
+
+#### Security
+- Security improvements
+
+---
+
+**© 2025 Ahmed Mostafa Ibrahim — All Rights Reserved.**

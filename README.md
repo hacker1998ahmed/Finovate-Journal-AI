@@ -1,46 +1,57 @@
 # Finovate Journal AI
 
-## Professional Desktop Accounting & AI Journal Entry Assistant
+## AI-Powered Desktop Accounting & Journal Entry Assistant
 
 ![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
-![Python](https://img.shields.io/badge/python-3.12+-green.svg)
-![License](https://img.shields.io/badge/license-MIT-orange.svg)
+![Python](https://img.shields.io/badge/python-3.12+-blue.svg)
+![License](https://img.shields.io/badge/license-MIT-green.svg)
 
-**Finovate Journal AI** is a professional desktop accounting application for Windows that transforms natural language accounting entries into accurate journal entries. Built with Python, PySide6, and SQLite.
+**Finovate Journal AI** is a professional desktop accounting application that transforms natural language descriptions into accurate journal entries. Built for Egyptian accounting standards with full Arabic/English support.
 
 ---
 
 ## 🌟 Features
 
 ### Core Accounting
-- ✅ **Smart Journal**: Write entries in natural language (Arabic/English)
-- ✅ **Manual Journal**: Traditional double-entry bookkeeping
-- ✅ **Chart of Accounts**: Hierarchical account structure
-- ✅ **Journal Ledger**: Complete transaction history
-- ✅ **General Ledger**: Account-wise transaction details
-- ✅ **Trial Balance**: Automated balance verification
-- ✅ **Tax Engine**: VAT support with configurable rates
-- ✅ **Multi-Company**: Manage multiple companies separately
-- ✅ **Fiscal Years**: Open/close accounting periods
+- ✅ **Smart Journal** - Convert natural language to journal entries (Arabic & English)
+- ✅ **Manual Journal Entry** - Traditional double-entry bookkeeping
+- ✅ **Chart of Accounts** - Fully customizable account structure
+- ✅ **General Ledger** - Complete transaction history per account
+- ✅ **Trial Balance** - Automated balance verification
+- ✅ **Multi-company Support** - Manage multiple entities
+- ✅ **Fiscal Years** - Open, close, and carry forward balances
 
-### AI-Powered
-- ✅ **NLP Parser**: Arabic & English natural language processing
-- ✅ **Confidence Score**: Reliability indicator for AI suggestions
-- ✅ **Hybrid Engine**: Rules + AI with validation layer
-- ✅ **Multiple Providers**: OpenAI, Ollama, LM Studio, Local
-- ✅ **Offline Mode**: Works without internet connectivity
+### Intelligent Processing
+- 🧠 **Hybrid Accounting Engine**
+  - Rule-based validation (offline)
+  - NLP parser for Arabic/English
+  - Optional AI assistant (OpenAI, Ollama, LM Studio)
+  - Confidence scoring & ambiguity detection
 
-### Reports & Export
-- ✅ **Financial Reports**: Income Statement, Balance Sheet
-- ✅ **PDF Export**: Professional report generation
-- ✅ **Excel Import/Export**: Bulk data operations
-- ✅ **Charts & Analytics**: Visual financial insights
+### Financial Management
+- 💰 **Cash & Bank Management**
+- 👥 **Customers & Suppliers**
+- 📊 **Financial Reports** (Income Statement, Balance Sheet)
+- 🧾 **Invoice System** (Basic)
+- 🏷️ **Tax Engine** - VAT support with configurable rates
+- 📍 **Cost Centers & Projects**
 
-### Security & Compliance
-- ✅ **Role-Based Access**: Admin, Accountant, Reviewer, Viewer
-- ✅ **Audit Trail**: Complete change tracking
-- ✅ **Data Encryption**: Secure credential storage
-- ✅ **Backup & Restore**: Automated data protection
+### Data & Security
+- 🔒 **Role-Based Access Control** (Admin, Accountant, Reviewer, Viewer)
+- 📝 **Complete Audit Trail**
+- 💾 **Automatic Backup & Restore**
+- 🔐 **Password Hashing & Session Management**
+- 🛡️ **Data Integrity Checks**
+
+### Internationalization
+- 🌍 **Bilingual Interface** - Arabic (RTL) & English (LTR)
+- 💱 **Multi-Currency Ready** (EGP base, extensible)
+- 📅 **Flexible Date Formats**
+
+### Export & Import
+- 📤 **Excel Export** - All reports and data
+- 📥 **Excel Import** - Charts of accounts, customers, suppliers
+- 📄 **PDF Reports** - Professional formatted documents
 
 ---
 
@@ -48,7 +59,7 @@
 
 ### Prerequisites
 - Python 3.12 or higher
-- Windows 10/11 (Linux/Mac supported with minor adjustments)
+- Windows 10/11 (tested), Linux, macOS
 
 ### Quick Start
 
@@ -69,43 +80,69 @@ pip install -r requirements.txt
 python -m app.main
 ```
 
-### Build Executable
-
-```bash
-# Build standalone executable
-pyinstaller --name "Finovate Journal AI" --windowed --icon=assets/icon.ico app/main.py
-```
-
 ---
 
 ## 📖 Usage
 
+### First Launch
+On first run, you'll be prompted to:
+1. Create a new company
+2. Try the demo company
+3. Restore from backup
+
 ### Smart Journal Example
 
-Write naturally:
+Type in natural language:
 ```
 شراء بضاعة نقدًا بمبلغ 10000 جنيه
 ```
-
-Or in English:
+or
 ```
-Purchased goods for cash 10000 EGP
+Paid office rent 5000 EGP from bank
 ```
 
 The system will:
 1. Parse the transaction
-2. Identify accounts (Dr Purchases, Cr Cash)
-3. Calculate tax if applicable
-4. Show confidence score
-5. Require user approval before posting
+2. Identify accounts (Debit/Credit)
+3. Extract amount and currency
+4. Detect tax if applicable
+5. Show confidence score
+6. Allow review before posting
 
-### Manual Journal
-
-Traditional double-entry with:
+### Manual Journal Entry
+Traditional double-entry interface with:
+- Automatic journal numbering (JE-2026-000001)
 - Debit/Credit validation
-- Account selection from Chart of Accounts
-- Cost centers & projects
-- Attachments support
+- Cost center assignment
+- Project tracking
+
+---
+
+## ⚙️ Configuration
+
+### AI Providers
+Configure in Settings → AI:
+
+| Provider | Use Case | Offline |
+|----------|----------|---------|
+| Disabled | No AI, rules only | ✅ |
+| Ollama | Local LLM | ✅ |
+| LM Studio | Local LLM | ✅ |
+| OpenAI Compatible | Cloud AI | ❌ |
+
+**Privacy Note:** No accounting data is sent to external AI providers without explicit user consent.
+
+### Tax Configuration
+Navigate to Settings → Tax to configure:
+- Tax name and rate
+- Input/Output tax accounts
+- Effective dates
+- Tax codes
+
+### Backup Settings
+- Manual backup: Tools → Create Backup
+- Auto backup: Daily, Weekly, Monthly
+- Backup includes: Database + attachments
 
 ---
 
@@ -114,82 +151,31 @@ Traditional double-entry with:
 ```
 FinovateJournalAI/
 ├── app/
-│   ├── accounting/      # Rules engine, validation
-│   ├── ai/              # AI providers, prompts
-│   ├── config/          # Settings, constants
-│   ├── database/        # SQLAlchemy models, sessions
-│   ├── models/          # Pydantic schemas
-│   ├── nlp/             # Natural language parser
-│   ├── reports/         # PDF, Excel generators
-│   ├── ui/              # PySide6 interfaces
-│   └── utils/           # Helpers, logging
-├── assets/              # Icons, images
-├── backups/             # Database backups
-├── data/                # SQLite databases
-├── i18n/                # Translations (ar/en)
-├── logs/                # Application logs
-├── reports/             # Generated reports
-├── templates/           # PDF templates
-├── tests/               # Unit & integration tests
-├── requirements.txt
-├── README.md
-└── main.py
+│   ├── main.py              # Application entry point
+│   ├── config/              # Settings & configuration
+│   ├── database/            # SQLAlchemy models & DB init
+│   ├── models/              # Pydantic models
+│   ├── repositories/        # Data access layer
+│   ├── services/            # Business logic
+│   ├── accounting/          # Accounting engine & rules
+│   ├── ai/                  # AI provider abstraction
+│   ├── nlp/                 # Natural language parser
+│   ├── reports/             # Report generators
+│   ├── imports/             # Excel import handlers
+│   ├── exports/             # Excel/PDF export
+│   ├── security/            # Auth & permissions
+│   ├── ui/                  # PySide6 interfaces
+│   └── utils/               # Helpers & utilities
+├── assets/                  # Images, icons
+├── templates/               # PDF templates
+├── i18n/                    # Translations (ar.json, en.json)
+├── data/                    # SQLite database (gitignored)
+├── logs/                    # Application logs (gitignored)
+├── backups/                 # Backup files (gitignored)
+├── reports/                 # Generated reports (gitignored)
+├── tests/                   # Unit & integration tests
+└── requirements.txt
 ```
-
----
-
-## ⚙️ Configuration
-
-### Developer Information
-
-**Developer:** Ahmed Mostafa Ibrahim  
-**Brand:** Finovate – AHMED EG  
-**Email:** GOGOM8870@GMAIL.COM  
-**Phone:** 01225155329  
-**Copyright:** © 2025 Ahmed Mostafa Ibrahim — All Rights Reserved.
-
-### Settings File
-
-Edit `app/config/settings.py` to customize:
-- Company defaults
-- Tax rates
-- AI providers
-- Backup schedules
-- UI preferences
-
----
-
-## 🤖 AI Integration
-
-### Supported Providers
-
-1. **Offline Rules Engine** (Default)
-2. **Local LLM** (Ollama, LM Studio)
-3. **OpenAI Compatible**
-4. **OpenRouter**
-
-### Setup AI (Optional)
-
-```python
-# In Settings > AI Configuration
-Provider: OpenAI
-API Key: sk-...
-Model: gpt-4o-mini
-```
-
-⚠️ **Privacy Note**: No data is sent to external AI services without explicit user consent.
-
----
-
-## 📊 Sample Transactions
-
-| Natural Language | Result |
-|-----------------|--------|
-| شراء بضاعة نقدًا 10000 | Dr Purchases, Cr Cash |
-| بيع آجل للعميل أحمد 15000 | Dr Customer, Cr Sales |
-| دفعت إيجار 5000 من البنك | Dr Rent Expense, Cr Bank |
-| استلمت من عميل 8000 | Dr Cash, Cr Customer |
-| شراء كمبيوتر 30000 شامل ضريبة | Dr Fixed Asset, Dr Input VAT, Cr Cash |
 
 ---
 
@@ -197,35 +183,25 @@ Model: gpt-4o-mini
 
 ```bash
 # Run all tests
-pytest tests/ -v
+pytest
 
-# With coverage
-pytest tests/ --cov=app --cov-report=html
+# Run with coverage
+pytest --cov=app --cov-report=html
+
+# Run specific test module
+pytest tests/test_accounting_engine.py
 ```
 
 ---
 
-## 🔒 Security
+## 📄 Developer Information
 
-- Passwords hashed with bcrypt
-- SQL injection prevention via SQLAlchemy ORM
-- API keys stored in encrypted config
-- Audit logs for all critical actions
-- Role-based access control
+**Developer:** Ahmed Mostafa Ibrahim  
+**Brand:** Finovate – AHMED EG  
+**Email:** [GOGOM8870@GMAIL.COM](mailto:GOGOM8870@GMAIL.COM)  
+**Phone:** 01225155329  
 
----
-
-## 📝 License
-
-MIT License - See [LICENSE](LICENSE) file
-
----
-
-## 📞 Support
-
-For issues, questions, or contributions:
-- Email: GOGOM8870@GMAIL.COM
-- Phone: 01225155329
+**Copyright:** © 2025 Ahmed Mostafa Ibrahim — All Rights Reserved.
 
 ---
 
@@ -235,4 +211,52 @@ This software is an辅助 tool for accounting analysis and journal entry prepara
 
 ---
 
-**Built with ❤️ by Finovate – AHMED EG**
+## 📝 License
+
+MIT License - See LICENSE file for details.
+
+---
+
+## 🔄 Version History
+
+See [CHANGELOG.md](CHANGELOG.md) for version history and updates.
+
+---
+
+## 🛠️ Building Executable
+
+```bash
+# Install PyInstaller
+pip install pyinstaller
+
+# Build Windows executable
+pyinstaller --onefile --windowed --name "Finovate Journal AI" --icon=assets/icon.ico app/main.py
+
+# Output: dist/Finovate Journal AI.exe
+```
+
+For portable mode, use `--onedir` instead of `--onefile`.
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please follow these guidelines:
+1. Fork the repository
+2. Create a feature branch
+3. Write tests for new features
+4. Ensure all tests pass
+5. Submit a pull request
+
+---
+
+## 📞 Support
+
+For issues, questions, or suggestions:
+- Open an issue on GitHub
+- Email: GOGOM8870@GMAIL.COM
+- Phone: 01225155329
+
+---
+
+**Built with ❤️ for the accounting community**

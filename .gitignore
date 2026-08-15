@@ -1,29 +1,73 @@
-```python
-# Database files
-*.db
+```
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+.env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
 
 # Environment
 .env
 .env.local
 *.env.*
 
-# Dependencies
-.venv/
-venv/
-__pycache__/
-*.pyc
-*.pyo
-*.pyd
+# Coverage
+.coverage
+htmlcov/
+.coverage.*
 
-# Logs and temp files
-*.log
+# Distribution / packaging
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+cover/
+
+# Pytest
+.pytest_cache/
+
+# MyPy
+.mypy_cache/
+
+# Temporary files
 *.tmp
-
-# Editors
-.vscode/
-.idea/
-
-# OS
+*~
 .DS_Store
 Thumbs.db
 ```

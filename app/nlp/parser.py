@@ -1,247 +1,378 @@
-"""NLP Parser for natural language accounting entries."""
-
-from typing import Dict, Any, Optional, List, Tuple
-from decimal import Decimal, InvalidOperation
+"""
+NLP Parser - Natural Language Processing for accounting transactions
+Supports Arabic and English transaction parsing
+"""
 import re
-from datetime import datetime
+from decimal import Decimal
+from typing import Dict, List, Optional, Tuple
+from dataclasses import dataclass, field
+from datetime import date
+import logging
 
-from ..config.constants import DEFAULT_CURRENCY, CURRENCY_SYMBOLS
-from ..accounting.rules import RulesEngine, AccountingRule
+logger = logging.getLogger(__name__)
 
 
-class NLPParser:
-    """Natural Language Parser for accounting transactions."""
+@dataclass
+class ParsedTransaction:
+    """Result of parsing a natural language transaction."""
+    original_text: str
+    language: str  # 'ar' or 'en'
+    transaction_type: Optional[str] = None
+    amount: Optional[Decimal] = None
+    currency: str = "EGP"
+    payment_method: Optional[str] = None  # cash, bank, credit
+    party: Optional[str] = None  # customer, supplier name
+    debit_accounts: List[Dict] = field(default_factory=list)
+    credit_accounts: List[Dict] = field(default_factory=list)
+    tax_amount: Optional[Decimal] = None
+    tax_rate: Optional[Decimal] = None
+    is_tax_inclusive: bool = False
+    confidence: float = 0.0
+    ambiguities: List[str] = field(default_factory=list)
+    explanation: str = ""
+    rule_matched: Optional[str] = None
 
-    def __init__(self):
-        self.rules_engine = RulesEngine()
-        
-        # Arabic number words mapping (simplified)
-        self.arabic_numbers = {
-            'صفر': 0, 'واحد': 1, 'اثنين': 2, 'ثلاثة': 3, 'أربعة': 4,
-            'خمسة': 5, 'ستة': 6, 'سبعة': 7, 'ثمانية': 8, 'تسعة': 9,
-            'عشرة': 10, 'مائة': 100, 'ألف': 1000,
+
+class TransactionParser:
+    """
+    Parse natural language text into structured accounting transactions.
+    Supports both Arabic and English input.
+    """
+    
+    # Currency patterns
+    CURRENCY_PATTERNS = {
+        'ar': {
+            'EGP': ['جنيه', 'جنيهات', 'ج.م', 'مصرى', 'مصري'],
+            'USD': ['دولار', 'دولارات', '$'],
+            'EUR': ['يورو', '€'],
+            'SAR': ['ريال', 'ريالات', 'ر.س'],
+            'AED': ['درهم', 'درهمات', 'د.إ'],
+            'GBP': ['جنيه استرليني', '£']
+        },
+        'en': {
+            'EGP': ['EGP', 'Egyptian pound', 'LE'],
+            'USD': ['USD', 'dollar', 'dollars', '$'],
+            'EUR': ['EUR', 'euro', '€'],
+            'SAR': ['SAR', 'Saudi riyal', '﷼'],
+            'AED': ['AED', 'UAE dirham', 'DH'],
+            'GBP': ['GBP', 'British pound', '£']
         }
+    }
+    
+    # Payment method patterns
+    PAYMENT_PATTERNS = {
+        'ar': {
+            'cash': ['نقد', 'نقدا', 'كاش', 'كاشة'],
+            'bank': ['بنك', 'من البنك', 'تحويل', 'شيك', 'شيكة'],
+            'credit': ['آجل', 'على الحساب', 'دين', 'قروض']
+        },
+        'en': {
+            'cash': ['cash', 'cashy'],
+            'bank': ['bank', 'from bank', 'transfer', 'check', 'cheque'],
+            'credit': ['credit', 'on account', 'on credit', 'deferred']
+        }
+    }
+    
+    # Amount patterns (Arabic and English numerals)
+    AMOUNT_PATTERN_AR = r'(\d{1,3}(?:,\d{3})*(?:\.\d{1,2})?)|\b(\d+)\b'
+    AMOUNT_PATTERN_EN = r'(\d{1,3}(?:,\d{3})*(?:\.\d{1,2})?)|\b(\d+)\b'
+    
+    # Tax patterns
+    TAX_PATTERNS = {
+        'ar': ['ضريبة', 'ض.ق.م', 'vat', 'قيمة مضافة', 'شامل الضريبة', ' شامل ضريبة'],
+        'en': ['tax', 'VAT', 'value added', 'including tax', 'tax inclusive']
+    }
+    
+    def __init__(self):
+        self.amount_pattern_ar = re.compile(self.AMOUNT_PATTERN_AR)
+        self.amount_pattern_en = re.compile(self.AMOUNT_PATTERN_EN)
+    
+    def detect_language(self, text: str) -> str:
+        """Detect if text is Arabic or English."""
+        # Check for Arabic characters
+        arabic_chars = re.findall(r'[\u0600-\u06FF]', text)
+        if len(arabic_chars) > len(text) * 0.3:  # More than 30% Arabic chars
+            return 'ar'
+        return 'en'
+    
+    def extract_amount(self, text: str, language: str) -> Optional[Decimal]:
+        """Extract monetary amount from text."""
+        pattern = self.amount_pattern_ar if language == 'ar' else self.amount_pattern_en
         
-        # Currency patterns
-        self.currency_patterns = [
-            r'(\d+(?:,\d{3})*(?:\.\d+)?)\s*(جنيه|ج.م|EGP|LE|ريال|درهم|دولار)',
-            r'(جنيه|ج.م|EGP|LE)\s*(\d+(?:,\d{3})*(?:\.\d+)?)',
-        ]
+        # Find all number matches
+        matches = pattern.findall(text)
         
-        # Amount extraction patterns
-        self.amount_patterns = [
-            r'(\d+(?:,\d{3})*(?:\.\d+)?)',  # Numbers with commas and decimals
-            r'(\d+)',  # Simple numbers
-        ]
-
-    def parse(self, text: str, language: Optional[str] = None) -> Dict[str, Any]:
+        for match in matches:
+            # match is a tuple due to groups in regex
+            num_str = match[0] if match[0] else match[1] if len(match) > 1 else None
+            
+            if num_str:
+                try:
+                    # Remove commas and convert to Decimal
+                    num_str = num_str.replace(',', '')
+                    amount = Decimal(num_str)
+                    if amount > 0:
+                        logger.debug(f"Extracted amount: {amount}")
+                        return amount
+                except Exception as e:
+                    logger.warning(f"Failed to parse amount '{num_str}': {e}")
+        
+        return None
+    
+    def extract_currency(self, text: str, language: str) -> str:
+        """Detect currency from text."""
+        text_lower = text.lower()
+        
+        for currency, patterns in self.CURRENCY_PATTERNS[language].items():
+            for pattern in patterns:
+                if pattern.lower() in text_lower:
+                    logger.debug(f"Detected currency: {currency}")
+                    return currency
+        
+        # Default to EGP for Egyptian context
+        return 'EGP'
+    
+    def extract_payment_method(self, text: str, language: str) -> Optional[str]:
+        """Detect payment method (cash, bank, credit)."""
+        text_lower = text.lower()
+        
+        for method, patterns in self.PAYMENT_PATTERNS[language].items():
+            for pattern in patterns:
+                if pattern.lower() in text_lower:
+                    logger.debug(f"Detected payment method: {method}")
+                    return method
+        
+        return None
+    
+    def extract_tax_info(self, text: str, language: str) -> Tuple[bool, Optional[Decimal]]:
         """
-        Parse natural language text into structured accounting data.
+        Extract tax information from text.
         
         Returns:
-            Dictionary with parsed transaction data
+            Tuple of (is_tax_inclusive, tax_rate)
         """
-        if language is None:
-            language = self._detect_language(text)
+        text_lower = text.lower()
+        is_inclusive = False
+        rate = None
         
-        result = {
-            "success": False,
-            "language": language,
-            "original_text": text,
-            "transaction_type": None,
-            "amount": None,
-            "currency": DEFAULT_CURRENCY,
-            "debit_account": None,
-            "credit_account": None,
-            "party": None,
-            "payment_method": None,
-            "tax_amount": None,
-            "tax_rate": None,
-            "confidence": 0,
-            "ambiguities": [],
-            "explanation": "",
-            "explanation_ar": "",
-            "rule_matched": None,
-        }
+        # Check for tax keywords
+        for pattern in self.TAX_PATTERNS[language]:
+            if pattern.lower() in text_lower:
+                is_inclusive = True
+                
+                # Try to extract tax rate
+                rate_match = re.search(r'(\d+(?:\.\d+)?)\s*%', text)
+                if rate_match:
+                    rate = Decimal(rate_match.group(1)) / 100
+                else:
+                    # Default VAT rate for Egypt
+                    rate = Decimal('0.14')
+                
+                break
         
-        # Extract amount
-        amount = self._extract_amount(text, language)
-        if amount:
-            result["amount"] = amount
-            result["success"] = True
-        
-        # Extract currency
-        currency = self._extract_currency(text, language)
-        if currency:
-            result["currency"] = currency
-        
-        # Find matching rule
-        rule = self.rules_engine.find_matching_rule(text, language)
-        if rule:
-            result["rule_matched"] = rule.name
-            result["debit_account"] = rule.debit_account
-            result["credit_account"] = rule.credit_account
-            result["transaction_type"] = rule.name
-            result["explanation"] = rule.description
-            result["explanation_ar"] = rule.description_ar
-            result["confidence"] = min(95, 70 + len(rule.patterns_ar) * 5)
-            result["success"] = True
-            
-            # Determine payment method
-            result["payment_method"] = self._detect_payment_method(text, language)
-            
-            # Check for tax indicators
-            tax_info = self._detect_tax(text, language, amount)
-            if tax_info:
-                result["tax_amount"] = tax_info.get("amount")
-                result["tax_rate"] = tax_info.get("rate")
+        logger.debug(f"Tax info: inclusive={is_inclusive}, rate={rate}")
+        return is_inclusive, rate
+    
+    def extract_party(self, text: str, language: str) -> Optional[str]:
+        """Extract party name (customer/supplier) from text."""
+        # Simple extraction - look for names after certain keywords
+        if language == 'ar':
+            patterns = [r'من\s+(\w+)', r'لـ?\s*(\w+)', r'شركة\s+(\w+)']
         else:
-            # No rule matched - identify ambiguities
-            result["confidence"] = 30
-            result["ambiguities"].append("no_rule_matched")
-            
-            if not amount:
-                result["ambiguities"].append("amount_not_found")
-            
-            result["explanation"] = "No matching accounting rule found. Please clarify the transaction."
-            result["explanation_ar"] = "لم يتم العثور على قاعدة محاسبية مطابقة. يرجى توضيح العملية."
+            patterns = [r'from\s+(\w+)', r'to\s+(\w+)', r'company\s+(\w+)']
         
+        for pattern in patterns:
+            match = re.search(pattern, text, re.IGNORECASE)
+            if match:
+                return match.group(1)
+        
+        return None
+    
+    def identify_transaction_type(self, text: str, language: str) -> Optional[str]:
+        """Identify the type of transaction from text."""
+        text_lower = text.lower()
+        
+        if language == 'ar':
+            if any(word in text_lower for word in ['شراء', 'اشتريت', 'اشتروا']):
+                return 'purchase'
+            elif any(word in text_lower for word in ['بيع', 'بعنا', 'باع']):
+                return 'sale'
+            elif any(word in text_lower for word in ['دفع', 'دفعت', 'دفعوا', 'مصروف']):
+                return 'expense_payment'
+            elif any(word in text_lower for word in ['استلمت', 'استلام', 'قبض', 'تحصيل']):
+                return 'collection'
+            elif any(word in text_lower for word in ['سددت', 'سداد', 'دفع لمورد']):
+                return 'supplier_payment'
+        else:
+            if any(word in text_lower for word in ['buy', 'bought', 'purchase']):
+                return 'purchase'
+            elif any(word in text_lower for word in ['sell', 'sold', 'sale']):
+                return 'sale'
+            elif any(word in text_lower for word in ['paid', 'pay', 'expense']):
+                return 'expense_payment'
+            elif any(word in text_lower for word in ['received', 'receive', 'collect']):
+                return 'collection'
+            elif any(word in text_lower for word in ['settle', 'payment to supplier']):
+                return 'supplier_payment'
+        
+        return None
+    
+    def calculate_confidence(
+        self,
+        has_amount: bool,
+        has_currency: bool,
+        has_payment_method: bool,
+        has_transaction_type: bool,
+        has_party: bool,
+        ambiguity_count: int
+    ) -> float:
+        """
+        Calculate confidence score based on extracted information.
+        
+        Returns:
+            Confidence score 0-100
+        """
+        score = 0
+        
+        # Base scores for each element
+        if has_amount:
+            score += 25
+        if has_currency:
+            score += 10
+        if has_payment_method:
+            score += 20
+        if has_transaction_type:
+            score += 25
+        if has_party:
+            score += 10
+        
+        # Penalty for ambiguities
+        score -= ambiguity_count * 10
+        
+        # Ensure score is between 0 and 100
+        return max(0, min(100, score))
+    
+    def parse(self, text: str) -> ParsedTransaction:
+        """
+        Parse natural language text into structured transaction.
+        
+        Args:
+            text: Natural language description of transaction
+            
+        Returns:
+            ParsedTransaction object with extracted information
+        """
+        logger.info(f"Parsing transaction: {text}")
+        
+        # Detect language
+        language = self.detect_language(text)
+        logger.debug(f"Detected language: {language}")
+        
+        # Extract components
+        amount = self.extract_amount(text, language)
+        currency = self.extract_currency(text, language)
+        payment_method = self.extract_payment_method(text, language)
+        is_tax_inclusive, tax_rate = self.extract_tax_info(text, language)
+        party = self.extract_party(text, language)
+        transaction_type = self.identify_transaction_type(text, language)
+        
+        # Track ambiguities
+        ambiguities = []
+        
+        if not amount:
+            ambiguities.append("Amount not detected")
+        
+        if not transaction_type:
+            ambiguities.append("Transaction type unclear")
+        
+        if not payment_method:
+            ambiguities.append("Payment method not specified")
+        
+        # Calculate confidence
+        confidence = self.calculate_confidence(
+            has_amount=(amount is not None),
+            has_currency=(currency != 'EGP' or 'جنيه' in text or 'EGP' in text),
+            has_payment_method=(payment_method is not None),
+            has_transaction_type=(transaction_type is not None),
+            has_party=(party is not None),
+            ambiguity_count=len(ambiguities)
+        )
+        
+        # Generate explanation
+        explanation = self._generate_explanation(
+            transaction_type=transaction_type,
+            amount=amount,
+            currency=currency,
+            payment_method=payment_method,
+            language=language
+        )
+        
+        result = ParsedTransaction(
+            original_text=text,
+            language=language,
+            transaction_type=transaction_type,
+            amount=amount,
+            currency=currency,
+            payment_method=payment_method,
+            party=party,
+            tax_amount=None,  # Will be calculated later
+            tax_rate=tax_rate,
+            is_tax_inclusive=is_tax_inclusive,
+            confidence=confidence,
+            ambiguities=ambiguities,
+            explanation=explanation
+        )
+        
+        logger.info(f"Parsed transaction: type={transaction_type}, amount={amount}, confidence={confidence}")
         return result
-
-    def _detect_language(self, text: str) -> str:
-        """Detect if text is Arabic or English."""
-        arabic_chars = re.compile(r'[\u0600-\u06FF]')
-        if arabic_chars.search(text):
-            return "ar"
-        return "en"
-
-    def _extract_amount(self, text: str, language: str) -> Optional[Decimal]:
-        """Extract monetary amount from text."""
-        # Try to find numbers in the text
-        for pattern in self.amount_patterns:
-            matches = re.findall(pattern, text)
-            if matches:
-                for match in matches:
-                    try:
-                        # Remove commas and convert to Decimal
-                        number_str = match.replace(',', '')
-                        amount = Decimal(number_str)
-                        if amount > 0:
-                            return amount
-                    except (InvalidOperation, ValueError):
-                        continue
-        return None
-
-    def _extract_currency(self, text: str, language: str) -> Optional[str]:
-        """Extract currency from text."""
-        text_lower = text.lower()
-        
-        currency_map = {
-            'جنيه': 'EGP',
-            'ج.م': 'EGP',
-            'egp': 'EGP',
-            'le': 'EGP',
-            'ريال': 'SAR',
-            'درهم': 'AED',
-            'دولار': 'USD',
-            'dollar': 'USD',
-            'euro': 'EUR',
-            'يورو': 'EUR',
-            'pound': 'GBP',
-            'جنيه استرليني': 'GBP',
-        }
-        
-        for key, value in currency_map.items():
-            if key in text_lower:
-                return value
-        
-        return DEFAULT_CURRENCY
-
-    def _detect_payment_method(self, text: str, language: str) -> Optional[str]:
-        """Detect payment method from text."""
-        text_lower = text.lower()
-        
-        if language == "ar":
-            if any(word in text_lower for word in ['نقدًا', 'نقد', 'كاش']):
-                return "cash"
-            elif any(word in text_lower for word in ['آجل', 'على الحساب', 'شيك', 'شوكة']):
-                return "credit"
-            elif any(word in text_lower for word in ['بنك', 'تحويل', 'شبكة']):
-                return "bank"
-        else:
-            if any(word in text_lower for word in ['cash', 'immediate']):
-                return "cash"
-            elif any(word in text_lower for word in ['credit', 'on account', 'later']):
-                return "credit"
-            elif any(word in text_lower for word in ['bank', 'transfer', 'check']):
-                return "bank"
-        
-        return None
-
-    def _detect_tax(self, text: str, language: str, amount: Optional[Decimal]) -> Optional[Dict[str, Any]]:
-        """Detect tax information from text."""
-        text_lower = text.lower()
-        
-        tax_indicators_ar = ['شامل ضريبة', ' شامل الضريبة', 'مع الضريبة', 'ضريبة قيمة مضافة']
-        tax_indicators_en = ['including tax', 'incl. VAT', 'with tax', 'VAT included']
-        
-        has_tax = False
-        if language == "ar":
-            has_tax = any(indicator in text_lower for indicator in tax_indicators_ar)
-        else:
-            has_tax = any(indicator in text_lower for indicator in tax_indicators_en)
-        
-        if has_tax and amount:
-            # Default VAT rate (Egypt)
-            default_rate = Decimal("14.0")
-            tax_amount = amount - (amount / (1 + default_rate / 100))
+    
+    def _generate_explanation(
+        self,
+        transaction_type: Optional[str],
+        amount: Optional[Decimal],
+        currency: str,
+        payment_method: Optional[str],
+        language: str
+    ) -> str:
+        """Generate human-readable explanation of the parsed transaction."""
+        if language == 'ar':
+            parts = []
+            if transaction_type:
+                type_map = {
+                    'purchase': 'شراء',
+                    'sale': 'بيع',
+                    'expense_payment': 'دفع مصروف',
+                    'collection': 'تحصيل',
+                    'supplier_payment': 'سداد مورد'
+                }
+                parts.append(f"نوع العملية: {type_map.get(transaction_type, transaction_type)}")
             
-            return {
-                "rate": default_rate,
-                "amount": tax_amount.quantize(Decimal("0.001")),
-            }
-        
-        return None
-
-    def get_suggestions(self, partial_text: str, language: str = "ar") -> List[str]:
-        """Get suggestions for completing partial text."""
-        suggestions = []
-        
-        if language == "ar":
-            if partial_text.startswith("شراء"):
-                suggestions = [
-                    "شراء بضاعة نقدًا",
-                    "شراء بضاعة آجل",
-                    "شراء أصل ثابت",
-                    "شراء مستلزمات",
-                ]
-            elif partial_text.startswith("بيع"):
-                suggestions = [
-                    "بيع بضاعة نقدًا",
-                    "بيع بضاعة آجل",
-                ]
-            elif partial_text.startswith("دفعت"):
-                suggestions = [
-                    "دفعت إيجار",
-                    "دفعت رواتب",
-                    "دفعت مصروف كهرباء",
-                    "دفعت لمورد",
-                ]
-            elif partial_text.startswith("استلمت"):
-                suggestions = [
-                    "استلمت من العميل",
-                    "استلمت دفعة نقدًا",
-                ]
+            if amount:
+                parts.append(f"المبلغ: {amount:,} {currency}")
+            
+            if payment_method:
+                method_map = {'cash': 'نقدي', 'bank': 'بنكي', 'credit': 'آجل'}
+                parts.append(f"طريقة الدفع: {method_map.get(payment_method, payment_method)}")
+            
+            return ' | '.join(parts) if parts else "تعذر تحليل العملية بالكامل"
         else:
-            if partial_text.startswith("purchase"):
-                suggestions = [
-                    "Purchase goods for cash",
-                    "Purchase goods on credit",
-                ]
-            elif partial_text.startswith("sale"):
-                suggestions = [
-                    "Sale for cash",
-                    "Sale on credit",
-                ]
-        
-        return suggestions
+            parts = []
+            if transaction_type:
+                parts.append(f"Type: {transaction_type.replace('_', ' ').title()}")
+            
+            if amount:
+                parts.append(f"Amount: {amount:,.2f} {currency}")
+            
+            if payment_method:
+                parts.append(f"Payment: {payment_method.title()}")
+            
+            return ' | '.join(parts) if parts else "Could not fully parse transaction"
+
+
+# Global parser instance
+parser = TransactionParser()
+
+
+def parse_transaction(text: str) -> ParsedTransaction:
+    """Convenience function to parse a transaction."""
+    return parser.parse(text)
