@@ -1,0 +1,17 @@
+{
+  "app_name": "Finovate Journal AI",
+  "language": "en",
+  "currency": "EGP",
+  "date_format": "%Y-%m-%d",
+  "theme": "system",
+  "font_size": 12,
+  "rtl_enabled": false,
+  "ai_mode": "auto",
+  "ai_provider": "disabled",
+  "allow_data_send_to_ai": false,
+  "backup_enabled": true,
+  "backup_frequency": "daily",
+  "journal_numbering_format": "JE-{year}-{seq:06d}",
+  "session_timeout_minutes": 60,
+  "password_min_length": 8
+}
