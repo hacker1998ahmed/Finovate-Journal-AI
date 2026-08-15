@@ -20,12 +20,31 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-
-# Virtual environments
 venv/
-.venv/
-env/
 ENV/
+env.bak/
+venv.bak/
+
+# Database
+*.db
+*.db-journal
+
+# Logs
+*.log
+logs/
+
+# Environment
+.env
+.env.local
+.env.*
+
+# Dependencies
+node_modules/
+
+# Coverage reports
+coverage/
+htmlcov/
+.coverage
 
 # IDE
 .vscode/
@@ -33,26 +52,16 @@ ENV/
 *.swp
 *.swo
 
-# Logs
-*.log
+# OS
+.DS_Store
+Thumbs.db
 
-# Environment
-.env
-.env.local
-*.env.*
+# Backups
+backups/
 
-# Coverage
-.coverage
-htmlcov/
-.coverage.*
-.cache
+# Reports
+reports/
 
-# Testing
-.pytest_cache/
-.mypy_cache/
-.hypothesis/
-
-# Distribution / packaging
-*.tar.gz
-*.whl
+# Data
+data/
 ```
