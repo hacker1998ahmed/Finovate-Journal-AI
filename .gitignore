@@ -20,14 +20,12 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-MANIFEST
 
 # Virtual environments
 venv/
+.venv/
 env/
 ENV/
-.venv/
-.env/
 
 # IDE
 .vscode/
@@ -35,37 +33,26 @@ ENV/
 *.swp
 *.swo
 
-# OS
-.DS_Store
-Thumbs.db
-
 # Logs
-logs/
 *.log
 
-# Environment variables
+# Environment
 .env
 .env.local
 *.env.*
 
 # Coverage
 .coverage
-coverage/
 htmlcov/
 .coverage.*
+.cache
 
 # Testing
 .pytest_cache/
 .mypy_cache/
+.hypothesis/
 
-# Project specific
-FinovateJournalAI/__pycache__/
-FinovateJournalAI/*.py[cod]
-FinovateJournalAI/*$py.class
-FinovateJournalAI/build/
-FinovateJournalAI/dist/
-FinovateJournalAI/venv/
-FinovateJournalAI/.env
-FinovateJournalAI/.env.local
-FinovateJournalAI/*.env.*
+# Distribution / packaging
+*.tar.gz
+*.whl
 ```

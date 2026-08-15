@@ -1,0 +1,23 @@
+# Finovate Journal AI - Dependencies
+# © 2025 Ahmed Mostafa Ibrahim — All Rights Reserved.
+
+# GUI Framework
+PySide6>=6.5.0
+
+# Database
+SQLAlchemy>=2.0.0
+
+# Utilities
+python-dateutil>=2.8.0
+
+# Optional: For future AI features
+# openai>=1.0.0
+# anthropic>=0.5.0
+
+# Optional: For Excel export
+# openpyxl>=3.1.0
+# pandas>=2.0.0
+
+# Optional: For PDF reports
+# reportlab>=4.0.0
+# weasyprint>=59.0
