@@ -4,8 +4,6 @@ from typing import List, Dict, Any, Optional
 from decimal import Decimal
 import re
 
-from ..config.constants import ACCOUNT_TYPES, NORMAL_BALANCES
-
 
 class AccountingRule:
     """Represents a single accounting rule."""
@@ -185,3 +183,7 @@ class RulesEngine:
     def add_rule(self, rule: AccountingRule) -> None:
         """Add a custom rule."""
         self.rules.append(rule)
+
+
+# Alias for backward compatibility
+RuleEngine = RulesEngine

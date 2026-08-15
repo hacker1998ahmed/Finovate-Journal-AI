@@ -37,7 +37,9 @@ class User(Base):
 
     # Relationships
     audit_logs = relationship("AuditLog", back_populates="user")
-    journal_entries = relationship("JournalEntry", back_populates="created_by_user")
+    journal_entries = relationship("JournalEntry", foreign_keys="JournalEntry.created_by", back_populates="created_by_user")
+    reviewed_entries = relationship("JournalEntry", foreign_keys="JournalEntry.reviewed_by")
+    posted_entries = relationship("JournalEntry", foreign_keys="JournalEntry.posted_by")
 
     def set_password(self, password: str) -> None:
         """Hash and set the user's password."""

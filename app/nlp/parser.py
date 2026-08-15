@@ -6,7 +6,7 @@ import re
 from datetime import datetime
 
 from ..config.constants import DEFAULT_CURRENCY, CURRENCY_SYMBOLS
-from .rules import RulesEngine, AccountingRule
+from ..accounting.rules import RulesEngine, AccountingRule
 
 
 class NLPParser:
