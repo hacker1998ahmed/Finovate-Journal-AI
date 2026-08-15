@@ -1,6 +1,6 @@
 """Account and AccountGroup models for Chart of Accounts."""
 
-from sqlalchemy import Column, Integer, String, Text, Boolean, ForeignKey, Enum as SQLEnum, Numeric
+from sqlalchemy import Column, Integer, String, Text, Boolean, ForeignKey, Enum as SQLEnum, Numeric, DateTime
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from decimal import Decimal
@@ -49,6 +49,23 @@ class AccountGroup(Base):
 
     def __repr__(self) -> str:
         return f"<AccountGroup(id={self.id}, code='{self.code}', name='{self.name_ar}')>"
+
+
+class AccountType(str, enum.Enum):
+    """Account type enumeration."""
+
+    ASSET = "asset"
+    LIABILITY = "liability"
+    EQUITY = "equity"
+    REVENUE = "revenue"
+    EXPENSE = "expense"
+
+
+class NormalBalance(str, enum.Enum):
+    """Normal balance side."""
+
+    DEBIT = "debit"
+    CREDIT = "credit"
 
 
 class Account(Base):

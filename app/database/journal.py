@@ -1,5 +1,6 @@
 """Journal Entry and Journal Line models."""
 
+import enum
 from sqlalchemy import Column, Integer, String, Text, Date, DateTime, ForeignKey, Enum as SQLEnum, Numeric, Boolean
 from sqlalchemy.orm import relationship
 from datetime import datetime, date
@@ -17,9 +18,6 @@ class EntryStatus(str, enum.Enum):
     REVIEWED = "reviewed"
     POSTED = "posted"
     CANCELLED = "cancelled"
-
-
-import enum
 
 
 class JournalEntry(Base):
